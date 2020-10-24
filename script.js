@@ -138,9 +138,8 @@ function testAssembleAggrigateArray()
 
 function generatePasswordLogical(passwordSize, wantLowercase, wantUppercase, wantNumeric, wantSpecialCharacters)
 {
-  // A password of ONE character is laughably insecure and flies in the face of the entire purpose of this code.
-  // However, as worded, the acceptence criteria does not expricitly ban exceptionally short passwords and so my code will allow for them.
-  // That said, in real life, I might seek clarification unless it were up to me and I could trust my users were not fools.
+  // although the UI will ensure that the given password size falls in the range [8,128], for the purpose of the logical function,
+  // I just check my logical precondition so that my loop functions correctly
   if((passwordSize >= 1) && !wantLowercase && !wantUppercase && !wantNumeric && !wantSpecialCharacters)
   {
     return null;
@@ -173,17 +172,21 @@ function generatePassword()
   
   while(isNaN(passwordSize))
   {
-    var passwordSizeString = prompt("How many characters should your password be?");
+    var passwordSizeString = prompt("How many characters should your password be?  Allowed range 8-128");
     passwordSize = parseInt(passwordSizeString);
+    if(!isNaN(passwordSize) && (passwordSize < 8 || passwordSize > 128)) {
+      alert("Your password length is out of range.  You may choose anywhere from 8 to 128 characters");
+      passwordSize = NaN; // stay in the while loop so I ask again
+    }
   }
   var wantLowercase = confirm("Do you want lowercase letters in your password?");
   var wantUppercase = confirm("Do you want uppercase letters in your password?");
   var wantNumeric = confirm("Do you want numeric characters in your password?");
   var wantSpecialCharacters = confirm("Do you want special characters in your password?");
   var password = generatePasswordLogical(passwordSize, wantLowercase, wantUppercase, wantNumeric, wantSpecialCharacters);
-  if(!password)
-  {
+  if(!password) {
     alert("Your password criteria is bad.  I need a positive integer size and at least one of the character-sets.");
+    return generatePassword();
   }
   return password;
 }

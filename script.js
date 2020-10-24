@@ -40,20 +40,16 @@ function pickRandFromAgrigateArrayWithEachSetWeighedEqually(aggArr)
 
 function pickRandomCharacter(aggArr)
 {
-  // even distribution of integers in [0,3]
-  var whichSet = Math.floor(Math.random() * 4);
-  var retchar = null;
-  switch(whichSet)
-  {
-    case 0: retchar = pickRandomCharacter(specialCharacters);
-    case 1: retchar = pickRandomCharacter(specialCharacters);
-    case 2: retchar = pickRandomCharacter(specialCharacters);
-    case 3: retchar = pickRandomCharacter(specialCharacters);
-  }
-
-  console.log("whichSet = " + whichSet);
-  
-  return 'a';
+  // this is a little silly since i'm just calling a different function by another name.
+  // If this were C, it could be justified in that this function call would probably be inlined
+  // such that each callsite of this function would sctually do a direct call to pickRandFromAgrigate as done below.
+  // This would eliminate the unnecessary overhead of the intermediate do-nothing function
+  // HOWEVER, in javascript, the optimization of the runtime should be minimal as to avoid the build overhead that a compiler
+  // can afford spending.  Hence, optimization is minimal in javascript engines and so javascript code should be written with this in consideration
+  // And I *have* taken this into consideration.  The cost is close to nothing an this is not run in any tight loops.
+  // furthermore, I ultimately want the caller to name this in terms of my objective instead of my strategy to achieve it
+  // which the following function was named for the purpose of understanding my code strategy
+  return pickRandFromAgrigateArrayWithEachSetWeighedEqually(aggArr);
 }
 
 // Write password to the #password input
@@ -90,20 +86,13 @@ else
   // node main
   console.log("Node is running.  If the script just completes silently then nothing below blew up.");
   
-  //stuff();
+  play();
   tests();
 }
 
-function stuff()
+function play()
 {
-  var meh = generatePasswordLogical(true, false, false, false);
-  console.log("meh = " + meh);
-
-  var aggregateArray = assembleAggrigateArray(
-    [true, false, false, false],
-    [[1,2,3,4,5], [], [], [] ]);
-
-    console.log("aggrigateArray = " + aggregateArray);
+    playGeneratePasswordLogical();
 }
 
 function deepArrayEquals(a, b)
@@ -120,6 +109,18 @@ function tests()
 {
   testDeepArrayEquals();
   testAssembleAggrigateArray();
+}
+
+/* 
+Randomness makes strict comparisons for testing difficult to impossible here.
+So I'll spit it out to the screen and eyeball it.  Meh.
+*/
+function playGeneratePasswordLogical()
+{
+  var wantLowercase = true, wantUppercase = true, wantNumeric=true, wantSpecialCharacters=false;
+
+  var pw = generatePasswordLogical(6, wantLowercase, wantUppercase, wantNumeric, wantSpecialCharacters);
+  console.log("pw = ", pw);
 }
 
 function testDeepArrayEquals()
@@ -142,7 +143,10 @@ function testAssembleAggrigateArray()
 
 function generatePasswordLogical(passwordSize, wantLowercase, wantUppercase, wantNumeric, wantSpecialCharacters)
 {
-  if(!wantLowercase && !wantUppercase && !wantNumeric && !wantSpecialCharacters)
+  // A password of ONE character is laughably insecure and flies in the face of the entire purpose of this code.
+  // However, as worded, the acceptence criteria does not expricitly ban exceptionally short passwords and so my code will allow for them.
+  // That said, in real life, I might seek clarification unless it were up to me and I could trust my users were not fools.
+  if((passwordSize >= 1) && !wantLowercase && !wantUppercase && !wantNumeric && !wantSpecialCharacters)
   {
     return null;
   } 
@@ -153,18 +157,30 @@ function generatePasswordLogical(passwordSize, wantLowercase, wantUppercase, wan
   var generatedPassword = "";
   for(var i=0; i<passwordSize; ++i)
   {
-    var newchar = pickRandFromAgrigateArrayWithEachSetWeighedEqually(aggregateArray);
-    generatedPassword.push(newchar);
+    var newchar = pickRandomCharacter(aggregateArray);
+    generatedPassword+=newchar;
   }
   
-  return "fakepassword - doesn't work yet";
+  return generatedPassword;
 }
 
 function generatePassword()
 {
-  var wantLowercase = !!prompt("Do you want lowercase letters in your password?");
-  var wantUppercase = !!prompt("Do you want uppercase letters in your password?");
-  var wantNumeric = !!prompt("Do you want numeric characters in your password?");
-  var wantSpecialCharacters = !!prompt("Do you want special characters in your password?");
-  return generatePasswordLogical(wantLowercase, wantUppercase, wantNumeric, wantSpecialCharacters)
+  var passwordSize = NaN;
+  
+  while(isNaN(passwordSize))
+  {
+    var passwordSizeString = prompt("How many characters should your password be?");
+    passwordSize = parseInt(passwordSizeString);
+  }
+  var wantLowercase = confirm("Do you want lowercase letters in your password?");
+  var wantUppercase = confirm("Do you want uppercase letters in your password?");
+  var wantNumeric = confirm("Do you want numeric characters in your password?");
+  var wantSpecialCharacters = confirm("Do you want special characters in your password?");
+  var password = generatePasswordLogical(passwordSize, wantLowercase, wantUppercase, wantNumeric, wantSpecialCharacters);
+  if(!password)
+  {
+    alert("Your password criteria is bad.  I need a positive integer size and at least one of the character-sets.");
+  }
+  return password;
 }

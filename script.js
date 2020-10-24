@@ -52,13 +52,6 @@ function pickRandomCharacter(aggArr)
   return pickRandFromAgrigateArrayWithEachSetWeighedEqually(aggArr);
 }
 
-// Write password to the #password input
-function writePassword() {
-  var password = generatePassword();
-  var passwordText = document.querySelector("#password");
-  passwordText.value = password;
-}
-
 var generateBtn = null;
 
 function isNode()
@@ -77,13 +70,15 @@ function assert(x)
 // main
 if(!isNode()) {
   // browser main
-  generateBtn = document.querySelector("#generate");
-  // Add event listener to generate button
-  generateBtn.addEventListener("click", writePassword);
+  browserMain();
 }
 else
 {
-  // node main
+  nodeMain();
+}
+
+function nodeMain()
+{
   console.log("Node is running.  If the script just completes silently then nothing below blew up.");
   
   play();
@@ -164,6 +159,14 @@ function generatePasswordLogical(passwordSize, wantLowercase, wantUppercase, wan
   return generatedPassword;
 }
 
+
+
+
+
+//////////////////////////////////////
+// Browser UI stuff goes below here //
+//////////////////////////////////////
+
 function generatePassword()
 {
   var passwordSize = NaN;
@@ -183,4 +186,18 @@ function generatePassword()
     alert("Your password criteria is bad.  I need a positive integer size and at least one of the character-sets.");
   }
   return password;
+}
+
+// Write password to the #password input
+function writePassword() {
+  var password = generatePassword();
+  var passwordText = document.querySelector("#password");
+  passwordText.value = password;
+}
+
+function browserMain()
+{
+  generateBtn = document.querySelector("#generate");
+  // Add event listener to generate button
+  generateBtn.addEventListener("click", writePassword);
 }

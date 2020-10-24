@@ -1,3 +1,4 @@
+"use strict"
 // I found the set of special characters that are understood as password special characters here:
 // https://owasp.org/www-community/password-special-characters 
 // This comes off as potentially dodgy but

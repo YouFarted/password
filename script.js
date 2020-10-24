@@ -24,6 +24,7 @@ function assert(x)
 
 // main
 if(!isNode()) {
+  // browser main
   generateBtn = document.querySelector("#generate");
   // Add event listener to generate button
   generateBtn.addEventListener("click", writePassword);
@@ -33,15 +34,19 @@ else
   // node main
   console.log("Node is running.  If the script just completes silently then nothing below blew up.");
   
-  assert(aFunctioinWithNoRuntimeBrowserDependencies_ThisJustDoublesTheArgument(5) == 10);
+  assert(generatePasswordLogical(true, false, false, false) === "fakepassword - doesn't work yet");
 }
 
-function aFunctioinWithNoRuntimeBrowserDependencies_ThisJustDoublesTheArgument(x)
+function generatePasswordLogical(wantLowercase, wantUppercase, wantNumeric, wantSpecialCharacters)
 {
-  return x * 2;
+  return "fakepassword - doesn't work yet";
 }
 
 function generatePassword()
 {
-  return "fakepassword - doesn't work yet";
+  var wantLowercase = !!prompt("Do you want lowercase letters in your password?");
+  var wantUppercase = !!prompt("Do you want uppercase letters in your password?");
+  var wantNumeric = !!prompt("Do you want numeric characters in your password?");
+  var wantSpecialCharacters = !!prompt("Do you want special characters in your password?");
+  return generatePasswordLogical(wantLowercase, wantUppercase, wantNumeric, wantSpecialCharacters)
 }

@@ -104,6 +104,19 @@ function tests()
 {
   testDeepArrayEquals();
   testAssembleAggrigateArray();
+  testPasswordHasAtLeastOneOfSet();
+  testVerifyPasswordContainsAtLeastOneCharOfEachSet();
+}
+
+function testVerifyPasswordContainsAtLeastOneCharOfEachSet()
+{
+  assert( verifyPasswordContainsAtLeastOneCharOfEachSet("ab1",[['a','b','c'], ['0','1','2']]));
+  assert(!verifyPasswordContainsAtLeastOneCharOfEachSet("ab1",[['a','b','c'], ['!','@','#']]));
+}
+
+function testPasswordHasAtLeastOneOfSet()
+{
+  assert(passwordHasAtLeastOneOfSet("1234567a89", ["a","b","c"]));
 }
 
 /* 
@@ -112,7 +125,7 @@ So I'll spit it out to the screen and eyeball it.  Meh.
 */
 function playGeneratePasswordLogical()
 {
-  var wantLowercase = true, wantUppercase = true, wantNumeric=true, wantSpecialCharacters=false;
+  var wantLowercase = true, wantUppercase = true, wantNumeric=true, wantSpecialCharacters=true;
 
   var pw = generatePasswordLogical(6, wantLowercase, wantUppercase, wantNumeric, wantSpecialCharacters);
   console.log("pw = ", pw);
@@ -149,13 +162,49 @@ function generatePasswordLogical(passwordSize, wantLowercase, wantUppercase, wan
     [specialCharacters, lowercaseCharacters, uppercaseCharacters, numericCharacters]);
 
   var generatedPassword = "";
-  for(var i=0; i<passwordSize; ++i)
+
+  // I toss and regenerate the password from scratch each time I generate one if the generated password is found not to contain at least
+  // one character from each allowed set.  This is safe for passwords in length from range [8,128] with at most 4 possible sets but if I had 
+  // more mutually exclusive sets that I had characters for a password then this could never be fulfilled and would loop forever.
+  // As-is, i'm potentially burning more cycles than strictly necessary but I think this is good-faith randomness to restart anew from a 
+  // password that doesn't cut it.
+  while(!verifyPasswordContainsAtLeastOneCharOfEachSet(generatedPassword, aggregateArray))
   {
-    var newchar = pickRandomCharacter(aggregateArray);
-    generatedPassword+=newchar;
+    generatedPassword = "";
+    for(var i=0; i<passwordSize; ++i)
+    {
+      var newchar = pickRandomCharacter(aggregateArray);
+      generatedPassword+=newchar;
+    }
   }
   
   return generatedPassword;
+}
+
+function passwordHasAtLeastOneOfSet(password, set)
+{
+  for(var i=0; i<set.length; ++i)
+  {
+    var charFromSet = set[i];
+    if(password.includes(charFromSet)){
+      return true;
+    }
+  }
+  return false;
+}
+
+function verifyPasswordContainsAtLeastOneCharOfEachSet(password, sets)
+{
+  for(var i=0; i<sets.length; ++i)
+  {
+    if(!passwordHasAtLeastOneOfSet(password, sets[i]))
+    {
+      return false;
+    }
+  }
+  // if I haven't returned yet, then all the sets have checked out 
+  // otherwise the function would have returned in the loop with a false
+  return true;
 }
 
 
